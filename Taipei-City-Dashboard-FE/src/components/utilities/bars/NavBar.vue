@@ -13,6 +13,9 @@ import { useDialogStore } from "../../../store/dialogStore";
 import UserSettings from "../../dialogs/UserSettings.vue";
 import ContributorsList from "../../dialogs/ContributorsList.vue";
 import Image1 from "../../../assets/images/img1.png";
+import Image2 from "../../../assets/images/img2.png";
+import Image3 from "../../../assets/images/img3.png";
+import Image4 from "../../../assets/images/img4.gif";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -30,14 +33,28 @@ const animalCanvas = ref(null);
 let animationFrameId = null;
 let animalImage = new Image();
 
-animalImage.src = Image1;
+function randImage() {
+	var num = Math.floor(Math.random() * 4);
+
+	if (num == 0) {
+		animalImage.src = Image1;
+	} else if (num == 1) {
+		animalImage.src = Image2;
+	} else if (num == 2) {
+		animalImage.src = Image3;
+	} else if (num == 3) {
+		animalImage.src = Image4;
+	}
+}
+
+randImage();
 
 const animal = {
-	x: 0, // 圈圈起始位置
-	y: 0, // 圈圈起始位置
+	x: 0, // 圖片起始位置
+	y: 0, // 圖片起始位置
 	width: 60,
 	height: 60,
-	speed: 1, // 調整速度
+	speed: 0.5, // 調整速度
 };
 
 function drawAnimal(ctx) {
@@ -54,6 +71,8 @@ function updateAnimal(canvasWidth) {
 	animal.x += animal.speed;
 	if (animal.x > canvasWidth) {
 		animal.x = -animal.width;
+		randImage();
+		drawAnimal();
 	}
 }
 
@@ -242,26 +261,17 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 canvas {
-	position: relative; //絕對位置:自己獨立一層
+	position: relative; //相對位置：原本的位置
 	// width: 100%;
 	height: 60px;
 	//border-bottom: 1px solid var(--color-border);
 	pointer-events: none; // 使canvas不影響鼠標事件
 	z-index: 1; // 圈圈在下
+	animation-duration: 3s;
 }
 
-// .animal-canvas {
-// 	position: absolute; //絕對位置
-// 	bottom: 0;
-// 	left: 0;
-// 	width: 100%;
-// 	height: 100px;
-// 	pointer-events: none; // 使canvas不影響鼠標事件
-// 	z-index: 1; // 確保canvas在其他元素下方
-// }
-
 .navbar {
-	position: absolute; // 相對位置：原本位置
+	position: absolute; // 絕對位置：:自己獨立一層
 	z-index: 2;
 	height: 60px;
 	width: 100vw;
