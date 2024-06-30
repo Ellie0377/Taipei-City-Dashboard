@@ -6,7 +6,7 @@
 	--color-highlight: #5a9cf8;
 	--color-normal-text: white;
 	--color-complement-text: #888787;
-	--color-component-background: #282a2c;
+	--color-component-background: hsl(210, 5%, 16%, 0);
 	--color-overlay: rgba(0, 0, 0, 0.65);
 	--font-to-icon: 1.2;
 	--font-xl: 1.5rem;

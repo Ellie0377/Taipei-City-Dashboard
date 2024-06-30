@@ -32,6 +32,8 @@ export const useAuthStore = defineStore("auth", {
 		isMobileDevice: false,
 		isNarrowDevice: false,
 		currentPath: "",
+		x: "",
+		y: "",
 	}),
 	getters: {},
 	actions: {
@@ -163,6 +165,11 @@ export const useAuthStore = defineStore("auth", {
 		// 2. Set the current path of the user
 		setCurrentPath(path) {
 			this.currentPath = path;
+		},
+		// 取得鼠標位置
+		getMouseXY(e) {
+			this.x = e.x;
+			this.y = e.y;
 		},
 	},
 });
