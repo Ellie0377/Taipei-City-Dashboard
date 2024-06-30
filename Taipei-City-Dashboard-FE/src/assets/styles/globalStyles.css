@@ -16,6 +16,7 @@
 	--font-s: 0.75rem;
 	--font-icon: "Material Icons Round";
 	--vh: 1vh;
+	--img-filter: invert(1);
 }
 
 * {

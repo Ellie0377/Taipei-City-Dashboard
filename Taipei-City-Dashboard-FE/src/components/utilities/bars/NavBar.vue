@@ -12,10 +12,10 @@ import { useDialogStore } from "../../../store/dialogStore";
 
 import UserSettings from "../../dialogs/UserSettings.vue";
 import ContributorsList from "../../dialogs/ContributorsList.vue";
-import Image1 from "../../../assets/images/img1.png";
-import Image2 from "../../../assets/images/img2.png";
-import Image3 from "../../../assets/images/img3.png";
-import Image4 from "../../../assets/images/img4.gif";
+// import Image1 from "../../../assets/images/img1.png";
+// import Image2 from "../../../assets/images/img2.png";
+// import Image3 from "../../../assets/images/img3.png";
+// import Image4 from "../../../assets/images/img4.gif";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -27,86 +27,39 @@ const linkQuery = computed(() => {
 	return `?index=${query.index}`;
 });
 
-import { ref, onMounted, onUnmounted } from "vue";
+//import { ref } from "vue";
 
-const animalCanvas = ref(null);
-let animationFrameId = null;
-let animalImage = new Image();
+//const animalCanvas = ref(null);
+// let animationFrameId = null;
+//let animalImage = new Image();
 
-function randImage() {
+function getImagePath() {
 	var num = Math.floor(Math.random() * 4);
 
+	let path = "";
+
 	if (num == 0) {
-		animalImage.src = Image1;
+		path = "../../../assets/images/img1.png";
 	} else if (num == 1) {
-		animalImage.src = Image2;
+		path = "../../../assets/images/img2.png";
 	} else if (num == 2) {
-		animalImage.src = Image3;
+		path = "../../../assets/images/img3.png";
 	} else if (num == 3) {
-		animalImage.src = Image4;
+		path = "../../../assets/images/img4.gif";
 	}
+
+	return path;
 }
 
-randImage();
-
-const animal = {
-	x: 0, // 圖片起始位置
-	y: 0, // 圖片起始位置
-	width: 60,
-	height: 60,
-	speed: 0.5, // 調整速度
+document.onload = function () {
+	document.getElementById("someImage").src = getImagePath();
 };
 
-function drawAnimal(ctx) {
-	// // 畫圈圈
-	// ctx.beginPath();
-	// ctx.arc(animal.x, animal.y, animal.size, 0, Math.PI * 2);
-	// ctx.fillStyle = "orange";
-	// ctx.fill();
-	ctx.drawImage(animalImage, animal.x, animal.y, animal.width, animal.height);
+function setRandomImage() {
+	const imgElement = document.getElementById("someImage");
+	const imagePath = getImagePath();
+	imgElement.src = imagePath;
 }
-
-function updateAnimal(canvasWidth) {
-	// 動態調整圈圈位置
-	animal.x += animal.speed;
-	if (animal.x > canvasWidth) {
-		animal.x = -animal.width;
-		randImage();
-		drawAnimal();
-	}
-}
-
-function animate() {
-	const canvas = animalCanvas.value;
-	const ctx = canvas.getContext("2d");
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-	drawAnimal(ctx);
-	updateAnimal(canvas.width);
-
-	animationFrameId = requestAnimationFrame(animate);
-}
-
-onMounted(() => {
-	const canvas = animalCanvas.value;
-	canvas.width = window.innerWidth; // 使canvas寬度與窗口寬度相同
-	canvas.height = 60; // 設置固定高度
-
-	animalImage.onload = () => {
-		animate();
-	};
-
-	window.addEventListener("resize", () => {
-		canvas.width = window.innerWidth;
-	});
-});
-
-onUnmounted(() => {
-	if (animationFrameId) {
-		cancelAnimationFrame(animationFrameId);
-	}
-	window.removeEventListener("resize", () => {});
-});
 </script>
 
 <template>
@@ -252,22 +205,43 @@ onUnmounted(() => {
 				</div>
 			</div>
 		</div>
-		<canvas
-			ref="animalCanvas"
-			src="../../../assets/images/people.png"
-		></canvas>
+		<img
+			class="canvas canvas-background canvas-mode"
+			src="../../../assets/images/img4.gif"
+		/>
 	</div>
 </template>
 
 <style scoped lang="scss">
-canvas {
+.canvas {
+	background-repeat: no-repeat;
 	position: relative; //相對位置：原本的位置
-	// width: 100%;
 	height: 60px;
-	//border-bottom: 1px solid var(--color-border);
 	pointer-events: none; // 使canvas不影響鼠標事件
+	top: 0;
+	left: 0;
 	z-index: 1; // 圈圈在下
-	animation-duration: 3s;
+	filter: var(--img-filter);
+	//unicode-bidi: isolate;
+}
+
+.canvas-mode {
+	animation: mymove 20s linear infinite alternate;
+	animation-delay: 0s;
+	animation-direction: normal;
+	animation-play-state: running;
+}
+
+@keyframes mymove {
+	0% {
+		left: 0px;
+	}
+	50% {
+		left: 100vw;
+	}
+	100% {
+		left: 0px;
+	}
 }
 
 .navbar {
