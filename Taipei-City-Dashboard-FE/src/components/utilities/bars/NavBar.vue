@@ -4,7 +4,7 @@
 
 <script setup>
 const { VITE_APP_TITLE } = import.meta.env;
-import { computed } from "vue";
+import { computed , ref } from "vue";
 import { useRoute } from "vue-router";
 import { useFullscreen } from "@vueuse/core";
 import { useAuthStore } from "../../../store/authStore";
@@ -12,256 +12,222 @@ import { useDialogStore } from "../../../store/dialogStore";
 
 import UserSettings from "../../dialogs/UserSettings.vue";
 import ContributorsList from "../../dialogs/ContributorsList.vue";
-// import Image1 from "../../../assets/images/img1.png";
-// import Image2 from "../../../assets/images/img2.png";
-// import Image3 from "../../../assets/images/img3.png";
-// import Image4 from "../../../assets/images/img4.gif";
+import IntroduceModal from "../../dialogs/IntroductionModal.vue";
 
 const route = useRoute();
 const authStore = useAuthStore();
 const dialogStore = useDialogStore();
 const { isFullscreen, toggle } = useFullscreen();
+const showModal = ref(false);
 
 const linkQuery = computed(() => {
 	const { query } = route;
 	return `?index=${query.index}`;
 });
-
-//import { ref } from "vue";
-
-//const animalCanvas = ref(null);
-// let animationFrameId = null;
-//let animalImage = new Image();
-
-function getImagePath() {
-	var num = Math.floor(Math.random() * 4);
-
-	let path = "";
-
-	if (num == 0) {
-		path = "../../../assets/images/img1.png";
-	} else if (num == 1) {
-		path = "../../../assets/images/img2.png";
-	} else if (num == 2) {
-		path = "../../../assets/images/img3.png";
-	} else if (num == 3) {
-		path = "../../../assets/images/img4.gif";
-	}
-
-	return path;
+const introduce = () => {
+	showModal.value = true;
 }
-
-document.onload = function () {
-	document.getElementById("someImage").src = getImagePath();
-};
-
-function setRandomImage() {
-	const imgElement = document.getElementById("someImage");
-	const imagePath = getImagePath();
-	imgElement.src = imagePath;
+const closeModal = () => {
+	showModal.value = false;
 }
 </script>
 
+<script>
+export default {
+	data() {
+		return {
+			// 使用物件來追蹤每個按鈕的懸停狀態
+			isHovered: {
+				modeButton: false,
+				infoButton: false,
+			},
+		};
+	},
+	methods: {
+		// 更新懸停狀態的方法
+		toggleHovered(button, value) {
+			this.isHovered[button] = value;
+		},
+	},
+};
+</script>
+
 <template>
-	<div>
-		<div class="navbar">
-			<a href="/">
-				<div class="navbar-logo">
-					<div class="navbar-logo-image">
-						<img
-							src="../../../assets/images/TUIC.svg"
-							alt="tuic logo"
-						/>
-					</div>
-					<div>
-						<h1>{{ VITE_APP_TITLE }}</h1>
-						<h2>Taipei City Dashboard</h2>
-					</div>
+	<div class="navbar">
+		<a href="/">
+			<div class="navbar-logo">
+				<div class="navbar-logo-image">
+					<img
+						src="../../../assets/images/TUIC.svg"
+						alt="tuic logo"
+					/>
 				</div>
-			</a>
+				<div>
+					<h1>{{ VITE_APP_TITLE }}</h1>
+					<h2>Taipei City Dashboard</h2>
+				</div>
+			</div>
+		</a>
+		<div
+			v-if="
+				authStore.currentPath !== 'admin' &&
+				!(authStore.isMobileDevice && authStore.isNarrowDevice)
+			"
+			class="navbar-tabs"
+		>
+			<router-link
+				v-if="authStore.token"
+				:to="`/component`"
+				:class="{
+					'router-link-active':
+						authStore.currentPath.includes('component'),
+				}"
+			>
+				組件瀏覽平台
+			</router-link>
+			<router-link
+				:to="`/dashboard${
+					linkQuery.includes('undefined') ? '' : linkQuery
+				}`"
+			>
+				儀表板總覽
+			</router-link>
+			<router-link
+				:to="`/mapview${
+					linkQuery.includes('undefined') ? '' : linkQuery
+				}`"
+			>
+				地圖交叉比對
+			</router-link>
+		</div>
+		<div class="navbar-user">
+			<button 
+				@click="introduce"
+				@mouseover="toggleHovered('IntroduceButton', true)"
+				@mouseleave="toggleHovered('IntroduceButton', false)"
+			>
+				<span :class="{ glow: isHovered.IntroduceButton }">speaker_notes</span>
+			</button>
+			<button
+				v-if="!(authStore.isMobileDevice && authStore.isNarrowDevice)"
+				class="hide-if-mobile"
+				@click="toggle"
+				@mouseover="toggleHovered('FullscreenButton', true)"
+				@mouseleave="toggleHovered('FullscreenButton', false)"
+			>
+				<span :class="{ glow: isHovered.FullscreenButton }">{{
+					isFullscreen ? "fullscreen_exit" : "fullscreen"
+				}}</span>
+			</button>
+			<button
+				v-if="authStore.token"
+				@click="authStore.toggleMode"
+				@mouseover="toggleHovered('modeButton', true)"
+				@mouseleave="toggleHovered('modeButton', false)"
+			>
+				<span :class="{ glow: isHovered.modeButton }">{{
+					authStore.user.mode === "light" ? "dark_mode" : "light_mode"
+				}}</span>
+			</button>
+			<div class="navbar-user-info">
+				<button
+					@mouseover="toggleHovered('infoButton', true)"
+					@mouseleave="toggleHovered('infoButton', false)"
+				>
+					<span :class="{ glow: isHovered.infoButton }">info</span>
+				</button>
+				<ul>
+					<li>
+						<a
+							href="https://tuic.gov.taipei/documentation"
+							target="_blank"
+							rel="noreferrer"
+							>技術文件</a
+						>
+					</li>
+					<li>
+						<button
+							@click="dialogStore.showDialog('contributorsList')"
+						>
+							專案貢獻者
+						</button>
+					</li>
+				</ul>
+				<teleport to="body">
+					<ContributorsList />
+				</teleport>
+			</div>
 			<div
 				v-if="
-					authStore.currentPath !== 'admin' &&
+					authStore.token &&
 					!(authStore.isMobileDevice && authStore.isNarrowDevice)
 				"
-				class="navbar-tabs"
+				class="navbar-user-user"
 			>
-				<router-link
-					v-if="authStore.token"
-					:to="`/component`"
-					:class="{
-						'router-link-active':
-							authStore.currentPath.includes('component'),
-					}"
-				>
-					組件瀏覽平台
-				</router-link>
-				<router-link
-					:to="`/dashboard${
-						linkQuery.includes('undefined') ? '' : linkQuery
-					}`"
-				>
-					儀表板總覽
-				</router-link>
-				<router-link
-					:to="`/mapview${
-						linkQuery.includes('undefined') ? '' : linkQuery
-					}`"
-				>
-					地圖交叉比對
-				</router-link>
-			</div>
-			<div class="navbar-user">
-				<button
-					v-if="
-						!(authStore.isMobileDevice && authStore.isNarrowDevice)
-					"
-					class="hide-if-mobile"
-					@click="toggle"
-				>
-					<span>{{
-						isFullscreen ? "fullscreen_exit" : "fullscreen"
-					}}</span>
+				<button>
+					{{ authStore.user.name }}
 				</button>
-				<div class="navbar-user-info">
-					<button><span>info</span></button>
-					<ul>
-						<li>
-							<a
-								href="https://tuic.gov.taipei/documentation"
-								target="_blank"
-								rel="noreferrer"
-								>技術文件</a
-							>
-						</li>
-						<li>
-							<button
-								@click="
-									dialogStore.showDialog('contributorsList')
-								"
-							>
-								專案貢獻者
-							</button>
-						</li>
-					</ul>
-					<teleport to="body">
-						<ContributorsList />
-					</teleport>
-				</div>
-				<div
-					v-if="
-						authStore.token &&
-						!(authStore.isMobileDevice && authStore.isNarrowDevice)
-					"
-					class="navbar-user-user"
-				>
-					<button>
-						{{ authStore.user.name }}
-					</button>
-					<ul>
-						<li>
-							<button
-								@click="dialogStore.showDialog('userSettings')"
-							>
-								用戶設定
-							</button>
-						</li>
-						<li
-							v-if="
-								authStore.currentPath !== 'admin' &&
-								authStore.user.is_admin
-							"
-							class="hide-if-mobile"
-						>
-							<router-link to="/admin"> 管理員後臺 </router-link>
-						</li>
-						<li
-							v-else-if="authStore.user.is_admin"
-							class="hide-if-mobile"
-						>
-							<router-link to="/dashboard">
-								返回儀表板
-							</router-link>
-						</li>
-						<li>
-							<button @click="authStore.handleLogout">
-								登出
-							</button>
-						</li>
-					</ul>
-					<teleport to="body">
-						<user-settings />
-					</teleport>
-				</div>
-				<div
-					v-else-if="
-						!(authStore.isMobileDevice && authStore.isNarrowDevice)
-					"
-					class="navbar-user-user"
-				>
-					<button @click="dialogStore.showDialog('login')">
-						登入
-					</button>
-				</div>
+				<ul>
+					<li>
+						<button @click="dialogStore.showDialog('userSettings')">
+							用戶設定
+						</button>
+					</li>
+					<li
+						v-if="
+							authStore.currentPath !== 'admin' &&
+							authStore.user.is_admin
+						"
+						class="hide-if-mobile"
+					>
+						<router-link to="/admin"> 管理員後臺 </router-link>
+					</li>
+					<li
+						v-else-if="authStore.user.is_admin"
+						class="hide-if-mobile"
+					>
+						<router-link to="/dashboard"> 返回儀表板 </router-link>
+					</li>
+					<li>
+						<button @click="authStore.handleLogout">登出</button>
+					</li>
+				</ul>
+				<teleport to="body">
+					<user-settings />
+				</teleport>
+			</div>
+			<div
+				v-else-if="
+					!(authStore.isMobileDevice && authStore.isNarrowDevice)
+				"
+				class="navbar-user-user"
+			>
+				<button @click="dialogStore.showDialog('login')">登入</button>
 			</div>
 		</div>
-		<img
-			class="canvas canvas-background canvas-mode"
-			src="../../../assets/images/img4.gif"
+		<IntroduceModal
+			:show="showModal"
+			@close="closeModal"
 		/>
 	</div>
 </template>
 
 <style scoped lang="scss">
-.canvas {
-	background-repeat: no-repeat;
-	position: relative; //相對位置：原本的位置
-	height: 60px;
-	pointer-events: none; // 使canvas不影響鼠標事件
-	top: 0;
-	left: 0;
-	z-index: 1; // 圈圈在下
-	filter: var(--img-filter);
-	//unicode-bidi: isolate;
-}
-
-.canvas-mode {
-	animation: mymove 20s linear infinite alternate;
-	animation-delay: 0s;
-	animation-direction: normal;
-	animation-play-state: running;
-}
-
-@keyframes mymove {
-	0% {
-		left: 0px;
-	}
-	50% {
-		left: 100vw;
-	}
-	100% {
-		left: 0px;
-	}
-}
-
 .navbar {
-	position: absolute; // 絕對位置：:自己獨立一層
-	z-index: 2;
 	height: 60px;
 	width: 100vw;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	border-bottom: 1px solid var(--color-border);
-	background-color: var(--color-component-background);
+	background-color: hsl(210, 5%, 16%, 0);
 	user-select: none;
-	//opacity: 0.3;
 
 	&-logo {
 		display: flex;
 
 		h1 {
-			font-weight: 500; // 字多粗
+			font-weight: 500;
 		}
 
 		h2 {
@@ -276,7 +242,7 @@ function setRandomImage() {
 
 			img {
 				height: 45px;
-				filter: invert(1);
+				filter: var(--img-filter);
 			}
 		}
 	}
@@ -290,7 +256,7 @@ function setRandomImage() {
 			align-items: center;
 			margin-left: var(--font-s);
 			transition: opacity 0.2s, border-bottom 0.2s;
-			border-bottom: solid 3px transparent; // 距離底部位置
+			border-bottom: solid 3px transparent;
 
 			&:hover {
 				opacity: 0.8;
@@ -317,14 +283,14 @@ function setRandomImage() {
 	&-user {
 		display: flex;
 		align-items: center;
-		//opacity: 0.3;
+
 		li a,
 		button {
 			display: flex;
 			align-items: center;
 			margin-right: var(--font-m);
 			padding: 2px 4px;
-			border-radius: 4px;
+			border-radius: 1px;
 			font-size: var(--font-m);
 			transition: background-color 0.25s;
 		}
@@ -332,6 +298,7 @@ function setRandomImage() {
 		span {
 			font-family: var(--font-icon);
 			font-size: calc(var(--font-l) * var(--font-to-icon));
+			filter: brightness(60%);
 		}
 
 		&-user:hover ul,
@@ -363,7 +330,8 @@ function setRandomImage() {
 				top: 55px;
 				padding: 8px;
 				border-radius: 5px;
-				background-color: rgb(85, 85, 85);
+				background-color: var(--color-component-background);
+				border: 1px solid var(--color-border);
 				opacity: 0;
 				transition: opacity 0.25s;
 				z-index: 10;
@@ -381,13 +349,15 @@ function setRandomImage() {
 				}
 
 				li:hover {
-					background-color: var(--color-complement-text);
+					background-color: var(--color-component-background);
+					filter: var(--img-filter);
 				}
 			}
 		}
 
 		&-info {
 			min-width: 0;
+
 			ul {
 				right: 120px;
 				top: 55px;
@@ -406,5 +376,12 @@ function setRandomImage() {
 			}
 		}
 	}
+}
+span {
+	transition: transform 0.3s ease-in-out, filter 0.5s ease-in-out;
+}
+span.glow {
+	transform: scale(1.3);
+	filter: brightness(100%);
 }
 </style>

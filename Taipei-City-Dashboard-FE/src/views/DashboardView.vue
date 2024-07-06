@@ -47,6 +47,15 @@ function handleMoreInfo(item) {
 		dialogStore.showMoreInfo(item);
 	}
 }
+
+function toTop() {
+	// console.log("Button clicked!"); // 调试用
+	// alert("這是一個警告訊息！");
+	const dashboardElement = document.getElementsByClassName("dashboard")[0];
+	if (dashboardElement) {
+		dashboardElement.scrollTop = 0;
+	}
+}
 </script>
 
 <template>
@@ -113,6 +122,15 @@ function handleMoreInfo(item) {
 				}
 			"
 		/>
+
+		<button class="top" @click="toTop">
+			<link
+				rel="stylesheet"
+				href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+			/>
+			<span class="material-symbols-outlined">upgrade</span>
+		</button>
+
 		<MoreInfo />
 		<ReportIssue />
 	</div>
@@ -151,8 +169,8 @@ function handleMoreInfo(item) {
 
 <style scoped lang="scss">
 .dashboard {
-	max-height: calc(100vh - 127px);
-	max-height: calc(var(--vh) * 100 - 127px);
+	max-height: calc(100vh - 127px - 90px);
+	max-height: calc(var(--vh) * 100 - 127px - 90px);
 	display: grid;
 	row-gap: var(--font-s);
 	column-gap: var(--font-s);
@@ -207,6 +225,22 @@ function handleMoreInfo(item) {
 			}
 		}
 	}
+}
+
+.top {
+	position: fixed;
+	width: 50px;
+	height: 50px;
+	bottom: 80px;
+	right: 50px;
+	border: 1.5px solid var(--dashboardcomponent-color-border);
+	border-radius: 50%;
+	text-align: center;
+	background-color: var(--dashboardcomponent-color-background);
+}
+
+.material-symbols-outlined {
+	font-size: 20px;
 }
 
 @keyframes spin {

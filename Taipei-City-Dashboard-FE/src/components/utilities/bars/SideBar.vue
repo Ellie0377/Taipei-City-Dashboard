@@ -114,8 +114,6 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .sidebar {
-	//position: absolute; // 相對位置
-	//z-index: 1;
 	width: 170px;
 	min-width: 170px;
 	height: calc(100vh - 80px);
@@ -153,12 +151,13 @@ onMounted(() => {
 				padding: 2px 6px;
 				border-radius: 5px;
 				background-color: var(--color-highlight);
-				color: var(--color-normal-text);
+				color: var(--color-highlight-text);
 				text-wrap: nowrap;
 
 				span {
 					margin-right: 4px;
 					font-family: var(--font-icon);
+					color: var(--color-highlight-text);
 				}
 			}
 		}

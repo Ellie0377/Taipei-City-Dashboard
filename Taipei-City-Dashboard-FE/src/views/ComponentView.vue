@@ -11,11 +11,12 @@ Testing: Jack Huang (Data Scientist), Ian Huang (Data Analysis Intern)
 <script setup>
 import { ref, onMounted } from "vue";
 import { DashboardComponent } from "city-dashboard-component";
-
+import WishComponent from "../components/dialogs/WishComponent.vue";
 import { useContentStore } from "../store/contentStore";
 import router from "../router/index";
 
 const contentStore = useContentStore();
+const showWishComponent = ref(false);
 
 const searchParams = ref({
 	searchbyindex: "",
@@ -41,109 +42,113 @@ function toggleFavorite(id) {
 onMounted(() => {
 	contentStore.getAllComponents(searchParams.value);
 });
+
+function toggleWishComponent() {
+	showWishComponent.value = !showWishComponent.value;
+}
 </script>
 
 <template>
-  <!-- Search Bar that is always present -->
-  <div class="componentview-search">
-    <div>
-      <input
-        v-model="searchParams.searchbyname"
-        placeholder="以名稱搜尋"
-        @keypress.enter="handleNewQuery"
-      >
-      <span
-        v-if="searchParams.searchbyname !== ''"
-        @click="
-          () => {
-            searchParams.searchbyname = '';
-            handleNewQuery();
-          }
-        "
-      >cancel</span>
-    </div>
-    <button @click="handleNewQuery">
-      搜尋
-    </button>
-  </div>
-  <!-- 1. If the components are loaded -->
-  <div
-    v-if="contentStore.components.length !== 0"
-    class="componentview"
-  >
-    <DashboardComponent
-      v-for="item in contentStore.components"
-      :key="item.index"
-      :config="item"
-      mode="preview"
-      :info-btn="true"
-      :add-btn="
-        !contentStore.editDashboard.components
-          .map((item) => item.id)
-          .includes(item.id)
-      "
-      :favorite-btn="true"
-      :is-favorite="contentStore.favorites?.components.includes(item.id)"
-      info-btn-text="資訊頁面"
-      @info="
-        (item) => {
-          router.push({
-            name: 'component-info',
-            params: { index: item.index },
-          });
-        }
-      "
-      @add="
-        (id, name) => {
-          contentStore.editDashboard.components.push({
-            id,
-            name,
-          });
-        }
-      "
-      @favorite="
-        (id) => {
-          toggleFavorite(id);
-        }
-      "
-    />
-  </div>
-  <!-- 2. If the components are still loading -->
-  <div
-    v-else-if="contentStore.loading"
-    class="componentview componentview-nodashboard"
-  >
-    <div class="componentview-nodashboard-content">
-      <div />
-    </div>
-  </div>
-  <!-- 3. If there is an error during loading -->
-  <div
-    v-else-if="contentStore.error"
-    class="componentview componentview-nodashboard"
-  >
-    <div class="componentview-nodashboard-content">
-      <span>sentiment_very_dissatisfied</span>
-      <h2>發生錯誤，無法載入</h2>
-    </div>
-  </div>
-  <!-- 4. If there are no components -->
-  <div
-    v-else
-    class="componentview componentview-nodashboard"
-  >
-    <div class="componentview-nodashboard-content">
-      <span>search_off</span>
-      <h2>查無組件</h2>
-      <p>請重新搜尋或更改篩選條件</p>
-    </div>
-  </div>
+	<!-- Search Bar that is always present -->
+	<div class="componentview-search">
+		<div>
+			<input
+				v-model="searchParams.searchbyname"
+				placeholder="以名稱搜尋"
+				@keypress.enter="handleNewQuery"
+			/>
+			<span
+				v-if="searchParams.searchbyname !== ''"
+				@click="
+					() => {
+						searchParams.searchbyname = '';
+						handleNewQuery();
+					}
+				"
+				>cancel</span
+			>
+		</div>
+		<button @click="handleNewQuery">搜尋</button>
+	</div>
+	<!-- 1. If the components are loaded -->
+	<div v-if="contentStore.components.length !== 0" class="componentview">
+		<DashboardComponent
+			v-for="item in contentStore.components"
+			:key="item.index"
+			:config="item"
+			mode="preview"
+			:info-btn="true"
+			:add-btn="
+				!contentStore.editDashboard.components
+					.map((item) => item.id)
+					.includes(item.id)
+			"
+			:favorite-btn="true"
+			:is-favorite="contentStore.favorites?.components.includes(item.id)"
+			info-btn-text="資訊頁面"
+			@info="
+				(item) => {
+					router.push({
+						name: 'component-info',
+						params: { index: item.index },
+					});
+				}
+			"
+			@add="
+				(id, name) => {
+					contentStore.editDashboard.components.push({
+						id,
+						name,
+					});
+				}
+			"
+			@favorite="
+				(id) => {
+					toggleFavorite(id);
+				}
+			"
+		/>
+
+		<div class="componentview-wish">
+			<p>找不到您想要的組件嗎</p>
+			<p>~歡迎許願~</p>
+			<button @click="toggleWishComponent">許願</button>
+		</div>
+		<WishComponent v-if="showWishComponent" @close="toggleWishComponent" />
+	</div>
+	<!-- 2. If the components are still loading -->
+	<div
+		v-else-if="contentStore.loading"
+		class="componentview componentview-nodashboard"
+	>
+		<div class="componentview-nodashboard-content">
+			<div />
+		</div>
+	</div>
+	<!-- 3. If there is an error during loading -->
+	<div
+		v-else-if="contentStore.error"
+		class="componentview componentview-nodashboard"
+	>
+		<div class="componentview-nodashboard-content">
+			<span>sentiment_very_dissatisfied</span>
+			<h2>發生錯誤，無法載入</h2>
+		</div>
+	</div>
+	<!-- 4. If there are no components -->
+	<div v-else class="componentview componentview-nodashboard">
+		<div class="componentview-nodashboard-content">
+			<span>search_off</span>
+			<h2>查無組件</h2>
+			<p>請重新搜尋或更改篩選條件</p>
+		</div>
+	</div>
 </template>
 
 <style scoped lang="scss">
 .componentview {
-	max-height: calc(100vh - 151px);
-	max-height: calc(var(--vh) * 100 - 151px);
+	max-height: calc(100vh - 151px - 60px);
+	max-height: calc(var(--vh) * 100 - 151px - 60px);
 	display: grid;
 	row-gap: var(--font-s);
 	column-gap: var(--font-s);
@@ -164,6 +169,33 @@ onMounted(() => {
 
 	@media (min-width: 2200px) {
 		grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+	}
+
+	&-wish {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		border-radius: 5px;
+		background-color: var(--dashboardcomponent-color-component-background);
+
+		p {
+			font-size: 18px;
+			font-weight: bold;
+			font-family: "微軟正黑體", "Microsoft JhengHei";
+		}
+
+		button {
+			width: 100px;
+			height: 40px;
+			margin-top: 30px;
+			border-radius: 5px;
+			background-color: var(--dashboardcomponent-color-complement-text);
+			color: var(--dashboardcomponent-color-component-background);
+			font-size: 18px;
+			font-weight: bold;
+			font-family: "微軟正黑體", "Microsoft JhengHei";
+		}
 	}
 
 	&-search {
@@ -200,6 +232,7 @@ onMounted(() => {
 			padding: 0px 4px;
 			border-radius: 5px;
 			background-color: var(--color-highlight);
+			color: var(--color-highlight-text);
 			font-size: var(--font-ms);
 			transition: opacity 0.2s;
 

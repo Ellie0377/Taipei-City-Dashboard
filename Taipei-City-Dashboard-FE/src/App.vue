@@ -22,6 +22,7 @@ import NotificationBar from "./components/dialogs/NotificationBar.vue";
 import InitialWarning from "./components/dialogs/InitialWarning.vue";
 import ComponentSideBar from "./components/utilities/bars/ComponentSideBar.vue";
 import LogIn from "./components/dialogs/LogIn.vue";
+import AppFooter from "./components/utilities/bars/AppFooter.vue";
 
 const authStore = useAuthStore();
 const dialogStore = useDialogStore();
@@ -80,7 +81,9 @@ onBeforeUnmount(() => {
 <template>
   <div class="app-container">
     <NotificationBar />
-    <NavBar v-if="authStore.currentPath !== 'embed'" />
+	<NavBar v-if="authStore.currentPath !== 'embed'" />
+	<img src="..\src\assets\images\giphy1.gif" alt="GIF" class="moving-gif">
+	<canvas class="board"></canvas>
     <!-- /mapview, /dashboard layouts -->
     <div
       v-if="
@@ -93,6 +96,7 @@ onBeforeUnmount(() => {
       <div class="app-content-main">
         <SettingsBar />
         <RouterView />
+		<AppFooter />
       </div>
     </div>
     <!-- /admin layouts -->
@@ -103,6 +107,7 @@ onBeforeUnmount(() => {
       <AdminSideBar />
       <div class="app-content-main">
         <RouterView />
+		<AppFooter />
       </div>
     </div>
     <!-- /component, /component/:index layouts -->
@@ -113,10 +118,12 @@ onBeforeUnmount(() => {
       <ComponentSideBar />
       <div class="app-content-main">
         <RouterView />
+		<AppFooter />
       </div>
     </div>
     <div v-else>
       <router-view />
+	  <AppFooter />
     </div>
     <InitialWarning />
     <LogIn />
@@ -134,6 +141,43 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped lang="scss">
+.board {
+	height: 60px;
+	width: 100vw;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid var(--color-border);
+	user-select: none;
+	background-color:var(--color-component-background);
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: -2;
+}
+.moving-gif{
+	position: absolute;
+	width: 40px;
+	height: auto;
+	margin: 0 var(--font-m);
+	animation: move 15s linear infinite;
+	position: absolute;
+	top: 3px; /* 固定在页面顶部 */
+	left: 0; /* 从页面左边开始 */
+	z-index: -1;
+	filter: var(--img-filter);
+}
+@keyframes move {
+	0% {
+		left: -10px;
+	}
+	50% {
+		left: calc(100vw - 40px);
+	}
+	100% {
+		left: -10px;
+	}
+}
 .app {
 	&-container {
 		max-width: 100vw;
